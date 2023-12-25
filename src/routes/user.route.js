@@ -1,8 +1,9 @@
 import { Router } from "express"
-import { registerUser } from "../controllers/user.controller.js"
+import { loginUser, registerUser,logoutUser } from "../controllers/user.controller.js"
 import { upload } from "../middlewares/multer.middleware.js"
+import { verifyJWT } from "../middlewares/auth.middleware.js"
 
-
+// router.route("path").method(middleware,controller);
 const router = Router()
 router.route("/register").post(
     upload.fields([
@@ -19,5 +20,9 @@ router.route("/register").post(
 
 
 
+router.route("/login").post(loginUser)
+
+//secured routes
+router.route("/logout").post(verifyJWT, logoutUser)
 
 export default router

@@ -55,8 +55,9 @@ userSchema.pre("save", async function(next){
     next()
 })
 
+// this methods are called on user created models or records not on model Name directly 
 userSchema.methods.isPasswordCorrect  = async function(password){
-   return await bcrypt.compare(password,this.password)
+   return await bcrypt.compare(password,this.password)  // here this keyword refers to individual record or model on which this method is called ;
 }
 
 userSchema.methods.generateAccessToken = function(){
