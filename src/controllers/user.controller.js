@@ -3,22 +3,25 @@ import { ApiError } from "../utils/ApiError.js"
 import { User } from '../models/user.model.js'
 import {uploadOnCloudinary} from "../utils/cloudinary.js"
 import { ApiResponse } from "../utils/ApiResponse.js";
+import jwt from "jsonwebtoken"
+import mongoose from "mongoose";
 
-const generateAccessAndRefreshTokens = async function(userId){
+const generateAccessAndRefereshTokens = async(userId) =>{
     try {
-        const user = await User.findById(userId) ;
-        const accessToken = user.generateAccessToken
-        const refreshToken = user.generateRefreshToken
+        const user = await User.findById(userId)
+        const accessToken = user.generateAccessToken() ;
+        const refreshToken = user.generateRefreshToken() ;
 
-        user.refreshToken = refreshToken ;
-        await user.save({validateBeforeSave:false})
+        user.refreshToken = refreshToken
+        await user.save({ validateBeforeSave: false })
+        return {accessToken, refreshToken}
 
-        return {refreshToken ,accessToken}
 
     } catch (error) {
-        throw new ApiError(500,'something went wrong while generating access and refresh token : '+error)
+        throw new ApiError(500, "Something went wrong while generating referesh and access token")
     }
 }
+
 
 const registerUser = asyncHandler( async (req,res)=> {
 
@@ -105,8 +108,9 @@ const registerUser = asyncHandler( async (req,res)=> {
 const loginUser = asyncHandler( async (req,res)=> {
 
     const{username ,email,password} = req.body ;
+    console.log(password , email)
 
-    if(!username || !email){
+    if(!username && !email){
         throw new ApiError(400,"Username or email is required !")
     }
 
@@ -124,7 +128,7 @@ const loginUser = asyncHandler( async (req,res)=> {
         throw new ApiError(401,"Password is incorrect")
     }
 
-    const {refreshToken ,accessToken} = await generateAccessAndRefreshTokens(user._id)
+    const {refreshToken ,accessToken} = await generateAccessAndRefereshTokens(user._id)
 
     const loggedInUser  = await User.findById(user._id).select("-password -refreshToken"); // select all fields except -givenFields  ;
 
@@ -175,5 +179,6 @@ const logoutUser = asyncHandler( async (req,res)=> {
 
 export {
     registerUser ,
-    loginUser
+    loginUser,
+    logoutUser
 }
